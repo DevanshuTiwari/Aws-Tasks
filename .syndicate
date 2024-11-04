@@ -1,0 +1,3 @@
+name: demo
+build_projects_mapping:
+  java: jsrc/main/java
