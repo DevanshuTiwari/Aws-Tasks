@@ -44,7 +44,7 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 
 			// Prepare DynamoDB item
 			Map<String, AttributeValue> item = new HashMap<>();
-			item.put("id", new AttributeValue(eventId));
+			item.put("id", new AttributeValue(eventId)); // Use only 'id' as the HASH key
 			item.put("principalId", new AttributeValue().withN(principalId.toString()));
 			item.put("createdAt", new AttributeValue(createdAt));
 			item.put("body", new AttributeValue().withM(convertContentToAttributeMap(content)));
@@ -55,18 +55,8 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 					.withItem(item);
 			dynamoDB.putItem(putItemRequest);
 
-			// Create success response
-			Map<String, Object> responseBody = new HashMap<>();
-			responseBody.put("id", eventId);
-			responseBody.put("principalId", principalId);
-			responseBody.put("createdAt", createdAt);
-			responseBody.put("body", content);
-
-			Map<String, Object> response = new HashMap<>();
-			response.put("statusCode", 201);
-			response.put("event", responseBody);
-
-			return response;
+			// Create success response with statusCode 201
+			return createSuccessResponse(eventId, principalId, createdAt, content);
 
 		} catch (Exception e) {
 			context.getLogger().log("Error: " + e.getMessage());
@@ -84,6 +74,19 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 		Map<String, Object> response = new HashMap<>();
 		response.put("statusCode", 400);
 		response.put("error", message);
+		return response;
+	}
+
+	private Map<String, Object> createSuccessResponse(String eventId, Integer principalId, String createdAt, Map<String, String> content) {
+		Map<String, Object> responseBody = new HashMap<>();
+		responseBody.put("id", eventId);
+		responseBody.put("principalId", principalId);
+		responseBody.put("createdAt", createdAt);
+		responseBody.put("body", content);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("statusCode", 201);  // Explicitly set statusCode to 201 for success
+		response.put("event", responseBody);
 		return response;
 	}
 }

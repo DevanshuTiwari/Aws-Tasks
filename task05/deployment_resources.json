@@ -43,7 +43,8 @@
         "enable_cors": false,
         "POST": {
           "authorization_type": "NONE",
-          "integration_type": "mock",
+          "integration_type": "lambda_proxy",
+          "lambda_name": "api_handler",
           "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
@@ -59,7 +60,7 @@
   "Events": {
     "resource_type": "dynamodb_table",
     "hash_key_name": "id",
-    "hash_key_type": "N",
+    "hash_key_type": "S",
     "read_capacity": 1,
     "write_capacity": 1,
     "tags": {}
