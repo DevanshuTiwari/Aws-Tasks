@@ -22,17 +22,17 @@
       ],
       "Version": "2012-10-17"
     },
-    "resource_type": "iam_policy",
-    "tags": {}
+    "resource_type": "iam_policy"
   },
   "api_handler-role": {
-    "predefined_policies": [],
+    "predefined_policies": [
+      "AmazonDynamoDBFullAccess"
+    ],
     "principal_service": "lambda",
     "custom_policies": [
       "lambda-basic-execution"
     ],
-    "resource_type": "iam_role",
-    "tags": {}
+    "resource_type": "iam_role"
   },
   "task5_api": {
     "resource_type": "api_gateway",
@@ -43,7 +43,7 @@
         "enable_cors": false,
         "POST": {
           "authorization_type": "NONE",
-          "integration_type": "lambda_proxy",
+          "integration_type": "lambda",
           "lambda_name": "api_handler",
           "api_key_required": false,
           "method_request_parameters": {},
@@ -53,16 +53,15 @@
           "default_error_pattern": true
         }
       }
-    },
-    "minimum_compression_size": 0,
-    "tags": {}
+    }
   },
-  "Events": {
+  "${target_table}": {
     "resource_type": "dynamodb_table",
     "hash_key_name": "id",
     "hash_key_type": "S",
     "read_capacity": 1,
     "write_capacity": 1,
-    "tags": {}
+    "global_indexes": [],
+    "autoscaling": []
   }
 }

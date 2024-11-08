@@ -15,10 +15,11 @@
     "security_group_ids" : [ ],
     "dependencies" : [ ],
     "event_sources" : [ ],
-    "env_variables" : { },
-    "tags" : { },
+    "env_variables" : {
+      "target_table" : "${target_table}"
+    },
     "publish_version" : true,
-    "alias" : "${lambdas_alias_name}",
+    "alias" : "learn",
     "logs_expiration" : "${logs_expiration}",
     "snap_start" : "None"
   }
