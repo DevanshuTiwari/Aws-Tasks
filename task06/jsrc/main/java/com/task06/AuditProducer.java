@@ -25,7 +25,8 @@ import java.util.UUID;
 @LambdaHandler(lambdaName = "audit_producer",
 		roleName = "audit_producer-role",
 		isPublishVersion = false,
-		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
+		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED,
+		aliasName = "learn"
 )
 @DynamoDbTriggerEventSource(
 		targetTable = "Configuration",
