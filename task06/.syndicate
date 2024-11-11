@@ -7,6 +7,50 @@ lambdas:
 events:
 - operation: deploy
   initiator: devanshu_tiwari
+  bundle_name: task06_241111.110948
+  deploy_name: task06
+  time_start: '2024-11-11T11:12:20Z'
+  time_end: '2024-11-11T11:12:38Z'
+  duration_sec: 17.435
+  status: succeeded
+  rollback_on_error: false
+- operation: build
+  initiator: devanshu_tiwari
+  bundle_name: task06_241111.110948
+  time_start: '2024-11-11T11:09:50Z'
+  time_end: '2024-11-11T11:10:28Z'
+  duration_sec: 38.038
+- operation: upload
+  initiator: devanshu_tiwari
+  bundle_name: task06_241111.110948
+  time_start: '2024-11-11T11:10:00Z'
+  time_end: '2024-11-11T11:10:28Z'
+  duration_sec: 27.771
+- operation: package_meta
+  initiator: devanshu_tiwari
+  bundle_name: task06_241111.110948
+  time_start: '2024-11-11T11:09:59Z'
+  time_end: '2024-11-11T11:09:59Z'
+  duration_sec: 0.008
+- operation: assemble
+  initiator: devanshu_tiwari
+  bundle_name: task06_241111.110948
+  time_start: '2024-11-11T11:09:51Z'
+  time_end: '2024-11-11T11:09:59Z'
+  duration_sec: 7.994
+- operation: assemble_java_mvn
+  initiator: devanshu_tiwari
+  bundle_name: task06_241111.110948
+  time_start: '2024-11-11T11:09:51Z'
+  time_end: '2024-11-11T11:09:59Z'
+  duration_sec: 7.976
+- operation: test
+  initiator: devanshu_tiwari
+  time_start: '2024-11-11T11:09:51Z'
+  time_end: '2024-11-11T11:09:51Z'
+  duration_sec: 0.002
+- operation: deploy
+  initiator: devanshu_tiwari
   bundle_name: task06_241111.105056
   deploy_name: task06
   time_start: '2024-11-11T10:51:57Z'
@@ -110,14 +154,14 @@ events:
   duration_sec: 0.001
 locks:
   modification_lock:
-    last_modification_date: '2024-11-11T05:22:58Z'
+    last_modification_date: '2024-11-11T05:42:38Z'
     locked_till: null
     initiator: devanshu_tiwari
 latest_deploy:
   initiator: devanshu_tiwari
-  bundle_name: task06_241111.105056
+  bundle_name: task06_241111.110948
   deploy_name: task06
-  time_start: '2024-11-11T10:51:57Z'
-  time_end: '2024-11-11T10:52:58Z'
-  duration_sec: 60.532
+  time_start: '2024-11-11T11:12:20Z'
+  time_end: '2024-11-11T11:12:38Z'
+  duration_sec: 17.435
   is_succeeded: true
