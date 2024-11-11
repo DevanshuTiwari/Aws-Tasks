@@ -1,98 +1,98 @@
 package com.task06;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-
+import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
+import com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue;
+import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
+import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
+import com.syndicate.deployment.annotations.events.DynamoDbTriggerEventSource;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.UUID;
 import java.time.Instant;
-import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
-import com.amazonaws.services.lambda.runtime.events.DynamodbStreamRecord; // Added the correct import
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-@LambdaHandler(
-		lambdaName = "audit_producer",
+@LambdaHandler(lambdaName = "audit_producer",
 		roleName = "audit_producer-role",
-		isPublishVersion = true,
-		aliasName = "${lambdas_alias_name}",
+		isPublishVersion = false,
 		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
-public class AuditProducer implements RequestHandler<List<DynamodbStreamRecord>, Map<String, Object>> {
-
-	private static final String AUDIT_TABLE_NAME = "Audit";  // The audit table name
-
+@DynamoDbTriggerEventSource(
+		targetTable = "Configuration",
+		batchSize = 1
+)
+@EnvironmentVariables(value = {
+		@EnvironmentVariable(key = "target_table", value = "${target_table}")
+})
+public class AuditProducer implements RequestHandler<DynamodbEvent, String> {
+	private final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+	private final DynamoDB dynamoDb = new DynamoDB(client);
+	private final String DYNAMODB_TABLE_NAME = System.getenv("target_table");
+	private final Table table = dynamoDb.getTable(DYNAMODB_TABLE_NAME);
 	@Override
-	public Map<String, Object> handleRequest(List<DynamodbStreamRecord> event, Context context) {
-		// DynamoDB client setup
-		AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClient.builder().build();
-		DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
+	public String handleRequest(DynamodbEvent event, Context context) {
 
-		// Result map to return status
-		Map<String, Object> resultMap = new HashMap<>();
-
-		try {
-			// Loop through the event records
-			for (DynamodbStreamRecord record : event) {
-				if (record.getEventName().equals("INSERT") || record.getEventName().equals("MODIFY")) {
-					// Extract new and old data from the DynamoDB stream record
-					Map<String, Object> newData = record.getDynamodb().getNewImage();
-					Map<String, Object> oldData = record.getDynamodb().getOldImage();
-
-					// Generate a unique id for the audit entry (UUID)
-					String auditId = UUID.randomUUID().toString();
-
-					// Create the modification time (current time)
-					String modificationTime = Instant.now().toString();
-
-					// Extract the itemKey (assumes the key is a string field 'key')
-					String itemKey = (String) newData.get("key");
-
-					// Build the audit record
-					Map<String, Object> auditRecord = new HashMap<>();
-					auditRecord.put("id", auditId);  // UUID
-					auditRecord.put("itemKey", itemKey);
-					auditRecord.put("modificationTime", modificationTime);
-
-					// Create ValueMap for inserting into DynamoDB
-					ValueMap valueMap = new ValueMap();
-					valueMap.withString("id", auditId)
-							.withString("itemKey", itemKey)
-							.withString("modificationTime", modificationTime);
-
-					// Handle "INSERT" case - new value will be logged
-					if (record.getEventName().equals("INSERT")) {
-						valueMap.withMap("newValue", newData);
-					}
-					// Handle "MODIFY" case - old and new values will be logged
-					else if (record.getEventName().equals("MODIFY")) {
-						valueMap.withString("updatedAttribute", "value");
-						valueMap.withString("oldValue", (String) oldData.get("value"));
-						valueMap.withString("newValue", (String) newData.get("value"));
-					}
-
-					// Insert the audit record into the DynamoDB "Audit" table
-					Table auditTable = dynamoDB.getTable(AUDIT_TABLE_NAME);
-					auditTable.putItem(new PutItemSpec().withItem(valueMap));
-				}
+		for(DynamodbEvent.DynamodbStreamRecord record: event.getRecords()){
+			String eventName=record.getEventName();
+			if(eventName.equals("INSERT")){
+				addDataToAuditTable(record.getDynamodb().getNewImage());
+				break;
 			}
+			else if(eventName.equals("MODIFY")){
+				modifyDataToAuditTable(record.getDynamodb().getNewImage(),record.getDynamodb().getOldImage());
 
-			resultMap.put("statusCode", 200);
-			resultMap.put("body", "Successfully processed stream event and logged audit records.");
-		} catch (Exception e) {
-			resultMap.put("statusCode", 500);
-			resultMap.put("body", "Error processing event: " + e.getMessage());
-			context.getLogger().log("Error: " + e.getMessage());
+			}
+			else{
+				break;
+			}
 		}
+		return "";
+	}
 
-		return resultMap;
+	private void modifyDataToAuditTable(Map<String, AttributeValue> newImage, Map<String, AttributeValue> oldImage) {
+		String key = newImage.get("key").getS();
+		int oldValue = Integer.parseInt(oldImage.get("value").getN());
+		int newValue = Integer.parseInt(newImage.get("value").getN());
+
+		if(newValue!=oldValue){
+			Item updateAuditItem= new Item()
+					.withPrimaryKey("id",UUID.randomUUID().toString())
+					.withString("itemKey",key)
+					.withString("modificationTime",DateTimeFormatter.ISO_INSTANT
+							.format(Instant.now().atOffset(ZoneOffset.UTC)))
+					.withString("updatedAttribute","value")
+					.withInt("oldValue",oldValue)
+					.withInt("newValue",newValue);
+			table.putItem(updateAuditItem);
+		}
+	}
+
+	private void addDataToAuditTable(Map<String, AttributeValue> newImage) {
+
+		String key=newImage.get("key").getS();
+		int value=Integer.parseInt(newImage.get("value").getN());
+
+		Map<String,Object> newValue=new HashMap<>();
+		newValue.put("key",key);
+		newValue.put("value", value);
+
+		Item auditItem=new Item()
+				.withPrimaryKey("id",UUID.randomUUID().toString())
+				.withString("itemKey",key)
+				.withString("modificationTime",DateTimeFormatter.ISO_INSTANT
+						.format(Instant.now().atOffset(ZoneOffset.UTC)))
+				.withMap("newValue",newValue);
+
+		table.putItem(auditItem);
 	}
 }
