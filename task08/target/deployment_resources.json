@@ -18,8 +18,16 @@
     "env_variables" : { },
     "tags" : { },
     "publish_version" : true,
-    "alias" : "${lambdas_alias_name}",
+    "alias" : "learn",
+    "layers" : [ "weather_layer" ],
     "logs_expiration" : "${logs_expiration}",
     "snap_start" : "None"
+  },
+  "weather_layer" : {
+    "name" : "weather_layer",
+    "runtimes" : [ "java11" ],
+    "resource_type" : "lambda_layer",
+    "deployment_package" : "weather_layer-assembly.zip",
+    "libraries" : [ "weather_layer/lib/task08-1.0.0.jar" ]
   }
 }

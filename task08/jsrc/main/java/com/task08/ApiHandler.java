@@ -4,6 +4,9 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
+import com.syndicate.deployment.annotations.lambda.LambdaLayer;
+import com.syndicate.deployment.model.ArtifactExtension;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +14,15 @@ import java.util.Map;
 @LambdaHandler(
 		lambdaName = "api_handler",
 		roleName = "api_handler-role",
+		layers = "weather_layer",
 		isPublishVersion = true,
-		aliasName = "${lambdas_alias_name}",
+		aliasName = "learn",
 		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
+)
+@LambdaLayer(
+		layerName = "weather_layer",
+		libraries = {"weather_layer/lib/task08-1.0.0.jar"},
+		artifactExtension = ArtifactExtension.ZIP
 )
 public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
 
