@@ -5,7 +5,10 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.annotations.lambda.LambdaLayer;
+import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.model.ArtifactExtension;
+import com.syndicate.deployment.model.lambda.url.AuthType;
+import com.syndicate.deployment.model.lambda.url.InvokeMode;
 
 
 import java.util.HashMap;
@@ -21,8 +24,12 @@ import java.util.Map;
 )
 @LambdaLayer(
 		layerName = "weather_layer",
-		libraries = {"weather_layer/lib/task08-1.0.0.jar"},
-		artifactExtension = ArtifactExtension.JAR
+		libraries = {"lib/task08-1.0.0.jar"},
+		artifactExtension = ArtifactExtension.ZIP
+)
+@LambdaUrlConfig(
+		authType = AuthType.NONE,
+		invokeMode = InvokeMode.BUFFERED
 )
 public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
 

@@ -21,13 +21,17 @@
     "alias" : "learn",
     "layers" : [ "weather_layer" ],
     "logs_expiration" : "${logs_expiration}",
-    "snap_start" : "None"
+    "snap_start" : "None",
+    "url_config" : {
+      "auth_type" : "NONE",
+      "invoke_mode" : "BUFFERED"
+    }
   },
   "weather_layer" : {
     "name" : "weather_layer",
     "runtimes" : [ "java11" ],
     "resource_type" : "lambda_layer",
-    "deployment_package" : "weather_layer-assembly.jar",
-    "libraries" : [ "weather_layer/lib/task08-1.0.0.jar" ]
+    "deployment_package" : "weather_layer-assembly.zip",
+    "libraries" : [ "lib/task08-1.0.0.jar" ]
   }
 }
