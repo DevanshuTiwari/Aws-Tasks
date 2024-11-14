@@ -27,7 +27,7 @@
     "name" : "weather_layer",
     "runtimes" : [ "java11" ],
     "resource_type" : "lambda_layer",
-    "deployment_package" : "weather_layer-assembly.zip",
+    "deployment_package" : "weather_layer-assembly.jar",
     "libraries" : [ "weather_layer/lib/task08-1.0.0.jar" ]
   }
 }

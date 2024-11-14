@@ -22,7 +22,7 @@ import java.util.Map;
 @LambdaLayer(
 		layerName = "weather_layer",
 		libraries = {"weather_layer/lib/task08-1.0.0.jar"},
-		artifactExtension = ArtifactExtension.ZIP
+		artifactExtension = ArtifactExtension.JAR
 )
 public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
 
