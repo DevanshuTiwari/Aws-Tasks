@@ -17,9 +17,9 @@
     "event_sources" : [ ],
     "env_variables" : { },
     "tags" : { },
-    "publish_version" : true,
-    "alias" : "learn",
-    "layers" : [ "weather_layer" ],
+    "publish_version" : false,
+    "alias" : "${lambdas_alias_name}",
+    "layers" : [ "api-layer" ],
     "logs_expiration" : "${logs_expiration}",
     "snap_start" : "None",
     "url_config" : {
@@ -27,11 +27,12 @@
       "invoke_mode" : "BUFFERED"
     }
   },
-  "weather_layer" : {
-    "name" : "weather_layer",
-    "runtimes" : [ "java11" ],
+  "api-layer" : {
+    "name" : "api-layer",
+    "runtimes" : [ "java17" ],
     "resource_type" : "lambda_layer",
-    "deployment_package" : "weather_layer-assembly.zip",
-    "libraries" : [ "lib/task08-1.0.0.jar" ]
+    "deployment_package" : "api-layer-assembly.zip",
+    "libraries" : [ "lib/open-meteo-1.0.1.jar" ],
+    "architectures" : [ "arm64" ]
   }
 }

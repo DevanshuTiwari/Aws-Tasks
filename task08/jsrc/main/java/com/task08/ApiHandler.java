@@ -2,62 +2,46 @@ package com.task08;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.open_meteo.OpenMeteoAPI;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
-import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.annotations.lambda.LambdaLayer;
 import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
+import com.syndicate.deployment.model.Architecture;
 import com.syndicate.deployment.model.ArtifactExtension;
+import com.syndicate.deployment.model.DeploymentRuntime;
+import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.syndicate.deployment.model.lambda.url.InvokeMode;
 
 
-import java.util.HashMap;
-import java.util.Map;
 
 @LambdaHandler(
 		lambdaName = "api_handler",
 		roleName = "api_handler-role",
-		layers = "weather_layer",
-		isPublishVersion = true,
-		aliasName = "learn",
+		aliasName = "${lambdas_alias_name}",
+		layers = {"api-layer"},
 		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
 @LambdaLayer(
-		layerName = "weather_layer",
-		libraries = {"lib/task08-1.0.0.jar"},
+		layerName = "api-layer",
+		libraries = {"lib/open-meteo-1.0.1.jar"},
+		runtime = DeploymentRuntime.JAVA17,
+		architectures = {Architecture.ARM64},
 		artifactExtension = ArtifactExtension.ZIP
 )
 @LambdaUrlConfig(
 		authType = AuthType.NONE,
 		invokeMode = InvokeMode.BUFFERED
 )
-public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
+public class ApiHandler implements RequestHandler<Object, String> {
 
-	@Override
-	public Map<String, Object> handleRequest(Object request, Context context) {
-		System.out.println("Fetching weather forecast from Open-Meteo API...");
-
-		// Initialize the WeatherForecastAPI
-		WeatherForecastAPI weatherApi = new WeatherForecastAPI();
-		Map<String, Object> resultMap = new HashMap<>();
-
+	public String handleRequest(Object request, Context context) {
+		OpenMeteoAPI api = new OpenMeteoAPI();
 		try {
-			// Example coordinates for testing (use actual values or parameters)
-			String latitude = "52.52"; // Example: Berlin
-			String longitude = "13.405";
-
-			// Fetch the weather forecast
-			String forecastData = weatherApi.getWeatherForecast(latitude, longitude);
-
-			// Populate the response map
-			resultMap.put("statusCode", 200);
-			resultMap.put("body", forecastData);
-		} catch (Exception e) {
-			System.err.println("Error fetching weather data: " + e.getMessage());
-			resultMap.put("statusCode", 500);
-			resultMap.put("body", "Failed to retrieve weather data");
+			return api.getWeatherForecast();
+		} catch (RuntimeException e) {
+			return e.getMessage();
 		}
 
-		return resultMap;
 	}
 }
