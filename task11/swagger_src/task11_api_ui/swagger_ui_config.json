@@ -1,1 +1,1 @@
-{"name": "task11_api_ui", "resource_type": "swagger_ui", "path_to_spec": "C:/Users/devanshu_tiwari/AWS Tasks/task11/swagger_src/task11_api_ui/swagger_ui_config.json", "target_bucket": "api-ui-hoster", "deployment_package": "swagger_ui_task11_api_ui.zip"}
+{"name": "task11_api_ui", "resource_type": "swagger_ui", "path_to_spec": "export/5hrycs25a5_oas_v3.json", "target_bucket": "api-ui-hoster", "deployment_package": "swagger_ui_task11_api_ui.zip"}
